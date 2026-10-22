@@ -8,7 +8,7 @@
 
 ## Documentos
 
-- **[`FUNCIONALIDADES_COMPLETAS.md`](FUNCIONALIDADES_COMPLETAS.md)** — documento único con todas las funcionalidades (184)
+- **[`RESUMEN_FUNCIONALIDADES.md`](RESUMEN_FUNCIONALIDADES.md)** — documento único con todas las funcionalidades (184)
 - [`01-compras-purchase.md`](01-compras-purchase.md)
 - [`02-inventario-inventory.md`](02-inventario-inventory.md)
 - [`03-fabricacion-mrp.md`](03-fabricacion-mrp.md)
@@ -16,6 +16,7 @@
 - [`05-mantenimiento-maintenance.md`](05-mantenimiento-maintenance.md)
 - [`06-plm.md`](06-plm.md)
 - [`07-codigos-barras-barcode.md`](07-codigos-barras-barcode.md)
+- [`08-evaluacion-funcionalidades-avanzadas.md`](08-evaluacion-funcionalidades-avanzadas.md)
 
 ---
 

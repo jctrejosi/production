@@ -742,4 +742,22 @@ flowchart TD
 
 ---
 
+## 11. Capacidades avanzadas evaluadas (8–14)
+
+Además de los 7 módulos base, se evaluaron siete bloques avanzados. El detalle completo está en [`08-evaluacion-funcionalidades-avanzadas.md`](08-evaluacion-funcionalidades-avanzadas.md).
+
+| Bloque | ¿Hace falta? | Cobertura Odoo | Decisión recomendada |
+|--------|--------------|----------------|----------------------|
+| 8. Planificación avanzada (MPS, MRP, capacidad finita, secuenciación, escenarios, cuellos de botella) | Sí, por fases | MRP ✅; MPS 🔶 Enterprise; capacidad finita/secuenciación/escenarios ⚠️ parcial o ausente | Incluir MPS y planificación por capacidad; APS externo si la capacidad finita es crítica |
+| 9. MES / ejecución de planta | Sí, nivel básico | Órdenes de trabajo y tiempos ✅; Shop Floor 🔶 Enterprise; MES completo ⚠️ | Shop Floor como MES ligero; MES externo si se requiere SPC o integración profunda |
+| 10. Trazabilidad integral | Sí, crítico si es regulado | Lote/serie y genealogía ✅; operario/máquina ⚠️; recall/cuarentena ⚠️ | Incluir; Quality 🔶 para defectos; QMS/recall externo si hay regulación estricta |
+| 11. Rendimiento y eficiencia (OEE, FPY, desperdicio, cumplimiento) | Sí | Tiempos y paradas ✅; OEE ⚠️ simplificado; FPY ❌ | Incluir con definiciones formales y capa de BI |
+| 12. Control de procesos y excepciones | Sí si hay calidad regulada | No conformidades/CAPA 🔶 Enterprise; bloqueos y reprocesos ✅ parcial | Quality Enterprise; QMS si la regulación es estricta |
+| 13. Integración industrial e IoT | Opcional | IoT Box 🔶; PLC/SCADA/historiador ❌ | Solo si la automatización lo exige; middleware/integración a medida |
+| 14. Costos industriales | Sí, costeo básico | Costo estándar/real, materiales, mano de obra/máquina, WIP ✅; indirectos/variaciones ⚠️ | Incluir; BI/desarrollo para variaciones e indirectos |
+
+**Conclusión:** los bloques 10, 11 y 14 son extensiones naturales del alcance; 8 y 9 deben incluirse con un alcance explícito; 12 es obligatorio en industrias reguladas; 13 es opcional y depende de la planta.
+
+---
+
 **Fin del documento.**

@@ -7,9 +7,39 @@ Esta carpeta reúne la investigación funcional y técnica de los módulos de pr
 
 ---
 
-## Documento único consolidado
+## Especificación funcional del software
 
-**[`FUNCIONALIDADES_COMPLETAS.md`](FUNCIONALIDADES_COMPLETAS.md)** contiene **todas las funcionalidades contempladas** (184 funciones) en un solo archivo: catálogo por módulo, flujos, matriz Community/Enterprise, datos maestros, glosario y checklist de alcance.
+**[`FUNCIONALIDADES.md`](FUNCIONALIDADES.md)** es el documento normativo y **neutral respecto a proveedor**: define el alcance funcional completo del sistema de producción y abastecimiento, sin referencias a soluciones comerciales ni a su implementación técnica.
+
+Contiene 15 módulos con **293 funcionalidades codificadas**, cada una con objetivo, alcance, actores, reglas de negocio, integraciones, reportes y criterios de aceptación:
+
+| Código | Módulo | Funciones |
+|--------|--------|-----------|
+| `ABT` | Compras y abastecimiento | 22 |
+| `INV` | Inventario y almacenes | 44 |
+| `PRD` | Producción (MRP) | 41 |
+| `CAL` | Calidad | 18 |
+| `MNT` | Mantenimiento | 23 |
+| `PLM` | Ciclo de vida del producto | 16 |
+| `CAP` | Captura y códigos de barras | 20 |
+| `PLA` | Planificación avanzada | 14 |
+| `MES` | Ejecución y supervisión de planta | 16 |
+| `TRA` | Trazabilidad integral | 15 |
+| `REN` | Rendimiento y eficiencia (OEE) | 12 |
+| `EXC` | Control de procesos y excepciones | 12 |
+| `IOT` | Integración industrial e IoT | 12 |
+| `COS` | Costos industriales | 14 |
+| `TRV` | Funcionalidades transversales | 14 |
+
+Además incluye 7 flujos end-to-end, priorización por fases, criterios de aceptación globales, glosario y supuestos/exclusiones.
+
+> **Nota:** este documento describe *qué debe hacer el sistema*. Los documentos 00–08 describen la investigación sobre una plataforma de referencia concreta y su mapeo técnico; no forman parte de la especificación funcional.
+
+---
+
+## Documento consolidado de la investigación
+
+**[`RESUMEN_FUNCIONALIDADES.md`](RESUMEN_FUNCIONALIDADES.md)** contiene las **184 funciones** de los 7 módulos base en un solo archivo: catálogo por módulo, flujos, matriz de ediciones, datos maestros, glosario y checklist de alcance.
 
 ## Documentos de detalle
 
@@ -23,6 +53,7 @@ Esta carpeta reúne la investigación funcional y técnica de los módulos de pr
 | [`05-mantenimiento-maintenance.md`](05-mantenimiento-maintenance.md) | Maintenance: equipos, solicitudes, preventivo, MTBF/MTTR |
 | [`06-plm.md`](06-plm.md) | PLM (Enterprise): ECOs, versiones de BOM, aprobaciones |
 | [`07-codigos-barras-barcode.md`](07-codigos-barras-barcode.md) | Barcode: nomenclaturas, GS1 y app de escaneo |
+| [`08-evaluacion-funcionalidades-avanzadas.md`](08-evaluacion-funcionalidades-avanzadas.md) | Evaluación de planificación avanzada, MES, trazabilidad, OEE, excepciones, IoT y costos |
 
 ---
 
