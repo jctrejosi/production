@@ -1,0 +1,63 @@
+# ============================================================
+# PRODDSI (Suite Producción y Abastecimiento) — producción.
+#
+# Un solo contenedor:
+#   web → Caddy interno (:8080) sirviendo la SPA ya compilada.
+#
+# Solo se publica el puerto en 127.0.0.1 (30440) para diagnóstico: NO es
+# accesible desde internet. El único contenedor que ve internet es
+# `edge_caddy` (repo ecommerce), que publica 80/443 y reenvía a
+# `production_web:8080` por la red `shared_edge`.
+#
+# Uso normal: `node prod.js` (comprueba puertos, construye y levanta).
+# A mano:
+#   docker compose -f docker/docker-compose.yml up -d --build
+# ============================================================
+name: proddsi_prod
+
+services:
+  web:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: proddsi/web:latest
+    container_name: production_web
+    environment:
+      TZ: "America/Bogota"
+      # Caddy busca sus rutas de escritura en XDG/HOME; con el FS de solo
+      # lectura se redirigen al tmpfs.
+      HOME: /tmp/caddy
+      XDG_DATA_HOME: /tmp/caddy/data
+      XDG_CONFIG_HOME: /tmp/caddy/config
+    # Proceso sin privilegios (usuario no root de la imagen).
+    user: "1000:1000"
+    ports:
+      # Solo loopback y puerto propio (no 80/443, no 8080/8443 genéricos).
+      - "127.0.0.1:30440:8080"
+    networks:
+      - shared_edge
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=16m,mode=1777
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    restart: unless-stopped
+
+networks:
+  # Red que comparte con el edge compartido (docker/edge del repo ecommerce).
+  shared_edge:
+    external: true
+    name: shared_edge

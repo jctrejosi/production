@@ -1,0 +1,64 @@
+# ============================================================
+# PRODDSI — Caddy interno del contenedor (SIN TLS).
+#
+# Solo escucha en :8080 dentro de la red `shared_edge`. El TLS y los puertos
+# 80/443 los publica el edge compartido (`edge_caddy`, repo ecommerce), que
+# reenvía aquí conservando el Host.
+#
+# El sistema de archivos del contenedor es de solo lectura: Caddy no escribe
+# nada (admin off, persist_config off) y sus rutas XDG apuntan a /tmp.
+#
+# Validar a mano:
+#   docker exec production_web caddy validate --config /etc/caddy/Caddyfile
+# ============================================================
+
+{
+	admin off
+	auto_https off
+	persist_config off
+}
+
+# Cabeceras de seguridad. HSTS y X-Content-Type-Options también las pone el
+# edge; aquí se repiten para que el contenedor sea seguro aunque se consulte
+# por su puerto de loopback (diagnóstico).
+(security_headers) {
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+		Cross-Origin-Opener-Policy "same-origin"
+		Cross-Origin-Resource-Policy "same-origin"
+
+		# La app es un SPA: solo su propio bundle + Google Fonts (index.css).
+		# No hay backend propio, así que connect-src se limita a 'self'.
+		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests"
+
+		-Server
+	}
+}
+
+:8080 {
+	import security_headers
+
+	encode zstd gzip
+
+	# Healthcheck del contenedor (solo se consulta desde dentro/loopback).
+	respond /healthz 200
+
+	root * /srv
+
+	# Los assets llevan hash en el nombre: cacheables para siempre.
+	@immutable path /assets/*
+	header @immutable Cache-Control "public, max-age=31536000, immutable"
+
+	# Documento y favicon: siempre revalidar para no servir versiones viejas.
+	@document path / /index.html /dsi-logo.svg
+	header @document Cache-Control "no-cache"
+
+	# La app hoy no navega por URL, pero el fallback deja lista cualquier ruta
+	# profunda si más adelante se añade router del lado del cliente.
+	try_files {path} /index.html
+	file_server
+}

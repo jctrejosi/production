@@ -1,0 +1,95 @@
+name: CI/CD
+
+# CI valida cualquier cambio en dev y master. El despliegue automático corre
+# SOLO en push/manual sobre dev, después de que CI e imagen pasen.
+on:
+  pull_request:
+    branches: [dev, master]
+  push:
+    branches: [dev, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-cd-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  ci:
+    name: SPA (tipos + build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: Interface_web/pnpm-lock.yaml
+
+      - name: Instalar dependencias
+        working-directory: Interface_web
+        run: pnpm install --frozen-lockfile
+
+      # `build` = tsc --noEmit && vite build: los errores de tipos rompen CI.
+      - name: Compilar
+        working-directory: Interface_web
+        run: pnpm run build
+
+  image:
+    name: Build de la imagen de producción
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Preparar Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Compila EXACTAMENTE la imagen que se despliega (SPA + Caddy). No publica.
+      - name: Construir imagen
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile
+          push: false
+          load: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    name: Desplegar en el VPS
+    needs: [ci, image]
+    if: >-
+      needs.ci.result == 'success' &&
+      needs.image.result == 'success' &&
+      github.ref == 'refs/heads/dev' &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: [self-hosted, linux, mercaldas]
+    timeout-minutes: 30
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    steps:
+      - name: Desplegar commit
+        env:
+          # Ruta del clon de producción en el VPS (WSL). Se puede sobreescribir
+          # con la variable de repositorio DEPLOY_PATH.
+          DEPLOY_PATH: ${{ vars.DEPLOY_PATH || '/mnt/c/Users/Desarrolo4/Documents/production' }}
+          TARGET_SHA: ${{ github.sha }}
+        run: |
+          set -Eeuo pipefail
+          test -d "$DEPLOY_PATH" || {
+            echo "No existe DEPLOY_PATH=$DEPLOY_PATH" >&2
+            exit 1
+          }
+          bash "$DEPLOY_PATH/deploy/deploy.sh" "$TARGET_SHA"

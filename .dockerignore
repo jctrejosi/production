@@ -1,0 +1,13 @@
+# Contexto de build = raíz del repo. Solo se necesitan Interface_web/ y
+# docker/. Todo lo demás se excluye para que el contexto sea mínimo y rápido.
+.git
+.github
+deploy
+logs
+node_modules
+**/node_modules
+**/dist
+Interface_web/dev.log
+Interface_web/logs
+*.md
+.DS_Store

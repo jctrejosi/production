@@ -1,0 +1,14 @@
+{
+  "mode": "edge",
+  "dnsZone": "jcti.xyz",
+  "baseDomain": "production.jcti.xyz",
+  "publicIp": "170.254.229.68",
+  "acmeEmail": "admin@jcti.xyz",
+  "tls": true,
+  "edgePorts": {
+    "http": "127.0.0.1:30440"
+  },
+  "hosts": {
+    "app": "production.jcti.xyz"
+  }
+}
