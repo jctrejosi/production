@@ -38,8 +38,27 @@ Interface_web/
 
 ## Cómo correr
 
+Desde la raíz del proyecto (`production/`):
+
 ```sh
-pnpm install
+node dev.js          # instala si falta, levanta el servidor dev y libera la terminal
+node dev.js --prod   # compila y sirve el build de producción (vite preview)
+node dev.js --init   # reconstruye desde cero (borra Interface_web/node_modules y dist)
+node dev.js --stop   # detiene el servidor
+node dev.js --check  # verifica herramientas y dependencias
+node dev.js --verify # verifica la cobertura de 293 funcionalidades
+node dev.js --smoke  # smoke test con chromium (17 páginas)
+```
+
+`dev.js` vive en la raíz del proyecto, levanta `Interface_web/`, deja el
+servidor corriendo en segundo plano (salida en `logs/web.log`), soporta
+Windows (`dev.bat`) y Linux/macOS, y resuelve conflictos de puerto. En
+Windows: `dev.bat --init --yes`. Variables útiles: `PORT` (puerto, por
+defecto 8450), `NO_COLOR`, `DEV_KILL_OCCUPANTS=1`.
+
+También funcionan los comandos directos dentro de `Interface_web/`:
+
+```sh
 pnpm dev        # http://localhost:8450
 pnpm build      # typecheck + build de producción
 ```

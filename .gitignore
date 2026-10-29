@@ -1,0 +1,7 @@
+node_modules
+dist
+logs
+.DS_Store
+Interface_web/node_modules
+Interface_web/dist
+Interface_web/logs
