@@ -324,11 +324,17 @@ function stopAll() {
   const entries = Object.entries(pids);
   if (!entries.length) info("No hay servicios registrados.");
   for (const [name, value] of entries) {
-    const lista = Array.isArray(value) ? value : [value];
-    for (const entry of lista) {
+    const registros = Array.isArray(value) ? value : [value];
+    for (const entry of registros) {
       const pid = typeof entry === "object" ? entry.pid : entry;
-      info(`Deteniendo ${name} (pid ${pid})…`);
-      killPid(pid);
+      // Además del pid de spawn, mata los procesos que realmente quedaron
+      // escuchando el puerto (registrados al final del arranque).
+      const extras = typeof entry === "object" && Array.isArray(entry.pids) ? entry.pids : [];
+      const todos = [...new Set([pid, ...extras].filter(Boolean))];
+      for (const objetivo of todos) {
+        info(`Deteniendo ${name} (pid ${objetivo})…`);
+        killPid(objetivo);
+      }
     }
   }
   writePids({});
@@ -460,6 +466,13 @@ function openLog(name) {
   return { fd, logPath };
 }
 
+/**
+ * Lanza un servicio desacoplado con la salida directa al archivo de log.
+ *
+ * Importante: nada de `stdio: "inherit"` ni pipes. Un proceso desacoplado con
+ * la consola heredada abre una consola propia en Windows; por eso aquí todo va
+ * al descriptor del archivo y el padre se desentiende con `unref()`.
+ */
 function startService({ name, command, args, cwd, env }) {
   const { fd, logPath } = openLog(name);
   const child = spawn(command, args, {
@@ -469,10 +482,15 @@ function startService({ name, command, args, cwd, env }) {
     detached: true, // grupo propio: sobrevive al cierre de la terminal
     windowsHide: true,
   });
+
+  child.on("error", error => fail(`${name}: no se pudo arrancar (${error.message})`));
+  child.unref();
+  fs.closeSync(fd);
+
   const pids = readPids();
   pids[name] = { pid: child.pid, port: CONFIG.port, mode: options.prod ? MODE_PROD : MODE_DEV, startedAt: new Date().toISOString() };
   writePids(pids);
-  info(`Salida en ${rel(logPath)}`);
+  info(`[${name}] ▶ arrancado (pid ${child.pid}) · log: ${rel(logPath)}`);
   return child;
 }
 
@@ -608,6 +626,16 @@ async function main() {
   if (!listo) {
     throw new Error(`La interfaz no respondió en el puerto ${CONFIG.port}. Revisa logs/web.log.`);
   }
+
+  // Registra los pids que realmente quedaron escuchando el puerto (el pid de
+  // `spawn` puede ser un lanzador intermedio en Windows).
+  const escuchando = pidsOnPort(CONFIG.port);
+  if (escuchando.length > 0) {
+    const pids = readPids();
+    if (pids.web) pids.web.pids = escuchando;
+    writePids(pids);
+  }
+
   const estado = await httpStatus(`http://127.0.0.1:${CONFIG.port}/`);
   if (estado !== 200) {
     warn(`El servidor respondió con estado ${estado ?? "desconocido"}; revisa logs/web.log.`);
