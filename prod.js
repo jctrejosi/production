@@ -265,10 +265,17 @@ async function checkHostPort(cfg) {
 // HTTP
 // ─────────────────────────────────────────────────────────────────────────────
 
-function httpGet(url, timeoutMs = 8000) {
+function httpGet(url, timeoutMs = 8000, address = null) {
   return new Promise((resolve) => {
     const mod = url.startsWith("https:") ? require("node:https") : require("node:http");
-    const req = mod.get(url, { timeout: timeoutMs, headers: { "user-agent": "proddsi-prod/1.0" } }, (res) => {
+    const options = { timeout: timeoutMs, headers: { "user-agent": "proddsi-prod/1.0" } };
+    // `address` fuerza la IP de destino conservando Host y SNI: sirve para
+    // validar el edge desde el propio VPS cuando no hay hairpin NAT.
+    if (address) {
+      options.lookup = (hostname, opts, cb) =>
+        opts && opts.all ? cb(null, [{ address, family: 4 }]) : cb(null, address, 4);
+    }
+    const req = mod.get(url, options, (res) => {
       let body = "";
       res.setEncoding("utf8");
       res.on("data", (chunk) => {
@@ -368,14 +375,24 @@ async function checkPublic(cfg, { soft = true } = {}) {
   }
 
   const res = await httpGet(`https://${host}/`, 15000);
-  if (!res.ok) {
-    warn(`HTTPS público no respondió (${res.error || `HTTP ${res.status}`}).`);
-    line(`     El certificado se emite cuando el DNS ya resuelve; tras crearlo:`);
-    line(`     docker restart ${EDGE_CONTAINER}`);
-    return false;
+  if (res.ok) {
+    ok(`HTTPS público OK: https://${host}/`);
+    return true;
   }
-  ok(`HTTPS público OK: https://${host}/`);
-  return true;
+
+  // En el propio VPS no suele haber hairpin NAT: la IP pública no es
+  // alcanzable desde dentro. Se valida entonces contra el edge local,
+  // conservando Host y SNI (y por tanto la validación del certificado).
+  const viaEdge = await httpGet(`https://${host}/`, 15000, "127.0.0.1");
+  if (viaEdge.ok) {
+    ok(`HTTPS OK vía edge local: https://${host}/ (sin hairpin NAT)`);
+    return true;
+  }
+
+  warn(`HTTPS público no respondió (${res.error || `HTTP ${res.status}`}).`);
+  line(`     El certificado se emite cuando el DNS ya resuelve; tras crearlo:`);
+  line(`     docker restart ${EDGE_CONTAINER}`);
+  return false;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
