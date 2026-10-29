@@ -88,3 +88,18 @@ Cada documento de módulo sigue la misma estructura:
 ## Advertencia sobre Quality, PLM y Barcode
 
 Estos módulos **no están presentes** en el repositorio local porque son **Enterprise**. Sus documentos se basan en la funcionalidad estándar documentada de Odoo Enterprise y se marcan como tales. Todo lo relativo a Purchase, Inventory, Manufacturing y Maintenance fue verificado contra el código local.
+
+---
+
+## Despliegue
+
+La suite (`Interface_web`) corre en producción en un **contenedor Docker único**,
+publicada por el edge compartido en **https://production.jcti.xyz**.
+
+```bash
+node prod.js            # construye y levanta el contenedor
+node prod.js --dns      # registros DNS a crear en el proveedor
+node prod.js --status   # contenedor + DNS + HTTPS
+```
+
+Detalles de arquitectura, puertos, seguridad y CI/CD: [`docker/README.md`](docker/README.md).
