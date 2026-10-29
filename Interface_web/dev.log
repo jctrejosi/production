@@ -1,0 +1,14 @@
+$ vite --host 0.0.0.0
+
+  VITE v8.3.5  ready in 307 ms
+
+  ➜  Local:   http://localhost:8450/
+  ➜  Network: http://192.168.0.133:8450/  wlan0
+  ➜  Network: http://172.18.0.1:8450/     br-103dfd96158b
+6:08:05 PM [vite] (client) hmr update /src/index.css, /src/components/Shell.tsx, /src/pages/Dashboard.tsx, /src/pages/SuiteHome.tsx, /src/pages/Especificacion.tsx, /src/pages/ABT.tsx, /src/pages/PRD.tsx, /src/pages/INV.tsx, /src/pages/CAL.tsx, /src/pages/MNT.tsx, /src/pages/CAP.tsx, /src/pages/PLM.tsx, /src/pages/PLA.tsx, /src/pages/MES.tsx, /src/pages/TRA.tsx, /src/pages/REN.tsx, /src/pages/EXC.tsx, /src/pages/IOT.tsx, /src/pages/COS.tsx, /src/pages/TRV.tsx
+6:08:05 PM [vite] (client) hmr update /src/pages/Dashboard.tsx, /src/index.css
+6:08:05 PM [vite] (client) hmr update /src/components/Shell.tsx, /src/index.css
+6:08:05 PM [vite] (client) hmr update /src/pages/SuiteHome.tsx, /src/index.css
+9:19:58 PM [vite] (client) hmr update /src/pages/PRD.tsx, /src/index.css
+9:20:20 PM [vite] (client) hmr update /src/index.css, /src/pages/INV.tsx
+9:20:31 PM [vite] (client) hmr update /src/pages/INV.tsx, /src/index.css
