@@ -110,7 +110,7 @@ fi
 
 # Comprobación de punta a punta por el edge (TLS + DNS).
 if command -v curl >/dev/null 2>&1 && docker inspect "$EDGE_CONTAINER" >/dev/null 2>&1; then
-  if curl -fsS --max-time 20 --resolve "${PUBLIC_HOST}:443:127.0.0.1" "$PUBLIC_URL" >/dev/null 2>&1; then
+  if curl -fsS --max-time 20 --cacert /etc/mercaldas/edge-tls/origin.pem --resolve "${PUBLIC_HOST}:443:127.0.0.1" "$PUBLIC_URL" >/dev/null 2>&1; then
     log "HTTPS público OK: $PUBLIC_URL"
   else
     warn "El contenedor está sano, pero $PUBLIC_URL no respondió por el edge."
