@@ -96,13 +96,13 @@ if [[ "$STATUS" != "healthy" ]]; then
   die "Timeout esperando healthy (último estado: '${STATUS:-desconocido}')."
 fi
 
-# El edge es de otro proyecto (ecommerce). Se avisa si no está o no publica
-# este host, pero no se modifica desde aquí.
+# El edge es infraestructura aparte (/home/deploy/edge). Se avisa si no está
+# o no publica este host, pero no se modifica desde aquí: la fuente de verdad
+# es manager/edge/sites/production.caddy y se aplica con scripts/sync-edge.sh.
 if docker inspect "$EDGE_CONTAINER" >/dev/null 2>&1; then
-  if ! docker exec "$EDGE_CONTAINER" cat /etc/caddy/Caddyfile 2>/dev/null \
-      | grep -q "$APP_CONTAINER"; then
-    warn "El Caddyfile de $EDGE_CONTAINER no menciona $APP_CONTAINER."
-    warn "Actualiza el repo ecommerce (docker/edge/Caddyfile) y recarga el edge."
+  if ! docker exec "$EDGE_CONTAINER" sh -c 'grep -qsF production_web /etc/caddy/sites/*.caddy' 2>/dev/null; then
+    warn "Ningún archivo de /etc/caddy/sites/ del edge menciona $APP_CONTAINER."
+    warn "Añade edge/sites/production.caddy en manager y ejecuta scripts/sync-edge.sh."
   fi
 else
   warn "No existe $EDGE_CONTAINER: nadie publica 80/443."
